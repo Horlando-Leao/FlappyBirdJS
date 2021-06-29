@@ -1,4 +1,4 @@
-# FlappyBirdJS
+# FlappyBirdJS :bird:
 
 ## Try the game on: https://teste.teste
 
