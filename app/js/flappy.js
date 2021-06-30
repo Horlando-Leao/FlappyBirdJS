@@ -77,6 +77,8 @@ function Barreiras(altura, largura, abertura, espaco, notificarPonto, deslocamen
 }
 
 function Passaro(alturaJogo){
+    const audio = new Audio('sounds/swoosh.mp3');
+
     let voando = false;
     this.elemento = novoElemento('img', 'passaro');
     this.elemento.src = 'img/passaro.png';
@@ -98,7 +100,10 @@ function Passaro(alturaJogo){
             this.setY(alturaMaxima);
         }else{
             this.setY(novoY);
+            audio.play();
         }
+
+        
 
     }
 
@@ -106,22 +111,62 @@ function Passaro(alturaJogo){
 
 }
 
-
 function Progresso(){
+    const audio = new Audio('sounds/point.mp3');
+
     this.elemento = novoElemento('span', 'progresso');
     this.atualizarPontos = pontos => {
         this.elemento.innerHTML = pontos;
+        audio.play();
     }
     this.atualizarPontos(0);
+    
 }
 
+/**
+ * @description função para verificar se dois elementos estão sobrepostos
+ * @param {HTMLElement} elementoA 
+ * @param {HTMLElement} elementoB 
+ * @returns {boolean} true para sobreposição e false para não
+ */
+function estaoSobrepostos(elementoA, elementoB){
+    const a = elementoA.getBoundingClientRect();
+    const b = elementoB.getBoundingClientRect();
+
+    const horizontal = a.left + a.width >= b.left
+        && b.left + b.width >= a.left;
+    
+    const vertical = a.top + a.height >= b.top
+        && b.top + b.height >= a.top;
+
+    return horizontal && vertical;
+
+}
+
+function colidiu(passaro, barreiras){
+    let colidiu = false;
+    barreiras.pares.forEach(parDeBarreiras => {
+        if(!colidiu){
+            const superior = parDeBarreiras.superior.elemento;
+            const inferior = parDeBarreiras.inferior.elemento;
+            colidiu = estaoSobrepostos(passaro.elemento, superior) 
+                || estaoSobrepostos(passaro.elemento, inferior);
+        }
+    })
+    return colidiu;
+}
+
+
 function FlappyBird(){
+    const audioHit = new Audio('sounds/hit.mp3');
+    const audioStart = new Audio('sounds/flappy-bird.mp3');
+    
     let pontos = 0;
 
     //dificuldades
     const aberturaEntreParBarreiras = 200;
     const espacoEntreBarreiras = 400;
-    const velocidadeJogo = 1;
+    const velocidadeJogo = 3;
 
     const temporizadorStart = 20;
     
@@ -145,31 +190,28 @@ function FlappyBird(){
     areaDoJogo.appendChild(passaro.elemento);
     barreiras.pares.forEach(par => areaDoJogo.appendChild(par.elemento));
     
-    this.start = () => {
+    
+    this.start = (inicio) => {
+        
         const temporizador = setInterval(() =>{
+            
             barreiras.animar();
             passaro.animar();
-        }, temporizadorStart)
+
+            if(colidiu(passaro, barreiras)){
+                audioHit.play();
+                clearInterval(temporizador);
+            }
+
+        }, temporizadorStart);
+        audioStart.play();
     }
     
 }
 
+
 new FlappyBird().start();
 
-// const barreiras = new Barreiras(700, 1200, 200, 400);
-// const passaro = new Passaro(700);
-
-// const areaDoJogo = document.querySelector('[wm-flappy]');
-
-// areaDoJogo.appendChild(passaro.elemento)
-// areaDoJogo.appendChild(new Progresso().elemento);
-
-// barreiras.pares.forEach(par => areaDoJogo.appendChild(par.elemento));
-
-// setInterval(() => {
-//     barreiras.animar()
-//     passaro.animar();
-// }, 20)
 
 
 
