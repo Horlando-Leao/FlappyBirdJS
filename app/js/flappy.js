@@ -48,7 +48,7 @@ function ParDeBarreiras(altura, abertura, x){
 // const b = new ParDeBarreiras(700, 200, 400);
 // document.querySelector('[wm-flappy]').appendChild(b.elemento);
 
-function Barreiras(altura, largura, abertura, espaco, notificarPonto){
+function Barreiras(altura, largura, abertura, espaco, notificarPonto, deslocamento){
     this.pares = [
         new ParDeBarreiras(altura, abertura, largura),
         new ParDeBarreiras(altura, abertura, largura + espaco),
@@ -56,7 +56,7 @@ function Barreiras(altura, largura, abertura, espaco, notificarPonto){
         new ParDeBarreiras(altura, abertura, largura + espaco * 3)
     ];
 
-    const deslocamento = 3;
+    //const deslocamento = 3;
     this.animar = () => {
         this.pares.forEach(par => {
             par.setX(par.getX() - deslocamento);
@@ -106,22 +106,70 @@ function Passaro(alturaJogo){
 
 }
 
-const barreiras = new Barreiras(700, 1200, 200, 400);
-const passaro = new Passaro(700);
-const areaDoJogo = document.querySelector('[wm-flappy]');
 
-areaDoJogo.appendChild(passaro.elemento)
-barreiras.pares.forEach(par => areaDoJogo.appendChild(par.elemento));
-setInterval(() => {
-    barreiras.animar()
-    passaro.animar();
-}, 20)
+function Progresso(){
+    this.elemento = novoElemento('span', 'progresso');
+    this.atualizarPontos = pontos => {
+        this.elemento.innerHTML = pontos;
+    }
+    this.atualizarPontos(0);
+}
 
+function FlappyBird(){
+    let pontos = 0;
 
+    //dificuldades
+    const aberturaEntreParBarreiras = 200;
+    const espacoEntreBarreiras = 400;
+    const velocidadeJogo = 1;
 
+    const temporizadorStart = 20;
+    
 
+    const areaDoJogo = document.querySelector('[wm-flappy]'); 
+    const altura = areaDoJogo.clientHeight;
+    const largura = areaDoJogo.clientWidth;
 
+    const progresso = new Progresso();
+    const barreiras = new Barreiras(
+        altura, 
+        largura, 
+        aberturaEntreParBarreiras, 
+        espacoEntreBarreiras, 
+        () => progresso.atualizarPontos(++pontos),
+        velocidadeJogo
+    );
+    const passaro = new Passaro(altura);
 
+    areaDoJogo.appendChild(progresso.elemento);
+    areaDoJogo.appendChild(passaro.elemento);
+    barreiras.pares.forEach(par => areaDoJogo.appendChild(par.elemento));
+    
+    this.start = () => {
+        const temporizador = setInterval(() =>{
+            barreiras.animar();
+            passaro.animar();
+        }, temporizadorStart)
+    }
+    
+}
+
+new FlappyBird().start();
+
+// const barreiras = new Barreiras(700, 1200, 200, 400);
+// const passaro = new Passaro(700);
+
+// const areaDoJogo = document.querySelector('[wm-flappy]');
+
+// areaDoJogo.appendChild(passaro.elemento)
+// areaDoJogo.appendChild(new Progresso().elemento);
+
+// barreiras.pares.forEach(par => areaDoJogo.appendChild(par.elemento));
+
+// setInterval(() => {
+//     barreiras.animar()
+//     passaro.animar();
+// }, 20)
 
 
 
